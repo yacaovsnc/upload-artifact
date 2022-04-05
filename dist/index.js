@@ -1780,7 +1780,7 @@ function getUploadHeaders(contentType, isKeepAlive, isGzip, uncompressedLength, 
     }
     if (digest) {
         // TODO(robherley): should we use 'Digest' directly? https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Digest
-        requestOptions['X-Digest'] = `sha-256=${digest}`;
+        requestOptions['X-Digest'] = `md5=${digest}`;
     }
     // TODO(robherley): remove
     console.log(requestOptions);
