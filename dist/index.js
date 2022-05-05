@@ -572,8 +572,18 @@ class CRC64 {
         }
         this._crc = CRC64.flip64Bits(crc);
     }
-    digest() {
-        return this._crc.toString(16).toUpperCase();
+    digest(encoding) {
+        switch (encoding) {
+            case 'hex':
+                return this._crc.toString(16).toUpperCase();
+            case 'base64':
+                return this.toBuffer().toString('base64');
+            default:
+                return this.toBuffer();
+        }
+    }
+    toBuffer() {
+        return Buffer.from([0, 8, 16, 24, 32, 40, 48, 56].map(s => Number((this._crc >> BigInt(s)) & BigInt(0xff))));
     }
     static flip64Bits(n) {
         return (BigInt(1) << BigInt(64)) - BigInt(1) - n;
@@ -1895,6 +1905,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.digestForStream = exports.sleep = exports.getProperRetention = exports.rmFile = exports.getFileSize = exports.createEmptyFilesForArtifact = exports.createDirectoriesForArtifact = exports.displayHttpDiagnostics = exports.getArtifactUrl = exports.createHttpClient = exports.getUploadHeaders = exports.getDownloadHeaders = exports.getContentRange = exports.tryGetRetryAfterValueTimeInMilliseconds = exports.isThrottledStatusCode = exports.isRetryableStatusCode = exports.isForbiddenStatusCode = exports.isSuccessStatusCode = exports.getApiVersion = exports.parseEnvNumber = exports.getExponentialRetryTimeInMilliseconds = void 0;
+const crypto_1 = __importDefault(__nccwpck_require__(6113));
 const fs_1 = __nccwpck_require__(7147);
 const core_1 = __nccwpck_require__(6811);
 const http_client_1 = __nccwpck_require__(2445);
@@ -2063,7 +2074,8 @@ function getUploadHeaders(contentType, isKeepAlive, isGzip, uncompressedLength, 
         requestOptions['Content-Range'] = contentRange;
     }
     if (digest) {
-        requestOptions['x-actions-result-crc64'] = digest;
+        requestOptions['x-actions-results-crc64'] = digest.crc64;
+        requestOptions['x-actions-results-md5'] = digest.md5;
     }
     return requestOptions;
 }
@@ -2153,10 +2165,18 @@ exports.sleep = sleep;
 function digestForStream(stream) {
     return __awaiter(this, void 0, void 0, function* () {
         return new Promise((resolve, reject) => {
-            const hasher = new crc64_1.default();
-            stream.on('data', data => hasher.update(data));
-            stream.on('end', () => resolve(hasher.digest()));
-            stream.on('error', reject);
+            const crc64 = new crc64_1.default();
+            const md5 = crypto_1.default.createHash('sha256');
+            stream
+                .on('data', data => {
+                crc64.update(data);
+                md5.update(data);
+            })
+                .on('end', () => resolve({
+                crc64: crc64.digest('base64'),
+                md5: md5.digest('base64')
+            }))
+                .on('error', reject);
         });
     });
 }
