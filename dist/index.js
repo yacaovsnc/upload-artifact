@@ -2166,7 +2166,7 @@ function digestForStream(stream) {
     return __awaiter(this, void 0, void 0, function* () {
         return new Promise((resolve, reject) => {
             const crc64 = new crc64_1.default();
-            const md5 = crypto_1.default.createHash('sha256');
+            const md5 = crypto_1.default.createHash('md5');
             stream
                 .on('data', data => {
                 crc64.update(data);
