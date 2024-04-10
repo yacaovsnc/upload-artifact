@@ -261,7 +261,7 @@ function getRuntimeUrl() {
     if (!runtimeUrl) {
         throw new Error('Unable to get ACTIONS_RUNTIME_URL env variable');
     }
-    core.info("RuntimeUrl: " + process.env['ACTIONS_RUNTIME_URL'])
+    console.log("RuntimeUrl: " + process.env['ACTIONS_RUNTIME_URL'])
     return runtimeUrl;
 }
 exports.getRuntimeUrl = getRuntimeUrl;
