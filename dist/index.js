@@ -257,11 +257,11 @@ function getRuntimeToken() {
 }
 exports.getRuntimeToken = getRuntimeToken;
 function getRuntimeUrl() {
-    console.log("real runtimeUrl: " + process.env['ACTIONS_RUNTIME_URL'])
-    const runtimeUrl = "https://pipelinesghubeus5.actions.githubusercontent.com/gvjNRRSgZgnNg9SRGhnxZxAjCGzVuPmOvGsmR5ZZw54MeAUfBD/"	
+    const runtimeUrl = process.env['ACTIONS_RUNTIME_URL']	
     if (!runtimeUrl) {
         throw new Error('Unable to get ACTIONS_RUNTIME_URL env variable');
     }
+    core.info("RuntimeUrl: " + process.env['ACTIONS_RUNTIME_URL'])
     return runtimeUrl;
 }
 exports.getRuntimeUrl = getRuntimeUrl;
